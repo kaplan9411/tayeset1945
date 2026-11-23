@@ -4,7 +4,7 @@
 
 ## העלאה ל-GitHub Pages
 1. ב-GitHub: **New repository** → שם: `tayeset1945` → **Public** → Create.
-2. **Add file → Upload files** → לגרור את כל התוכן של התיקייה (כולל תיקיית `icons`) → **Commit changes**.
+2. **Add file → Upload files** → לגרור את כל התוכן של התיקייה (כל הקבצים, אין תיקיות) → **Commit changes**.
 3. **Settings → Pages** → Source: **Deploy from a branch** → Branch: `main` / `(root)` → **Save**.
 4. אחרי דקה-שתיים המשחק זמין בכתובת:
    `https://<שם-המשתמש>.github.io/tayeset1945/`
@@ -17,7 +17,7 @@
 
 ## עדכון המשחק
 1. להעלות את `index.html` החדש (Upload files → Commit).
-2. ב-`sw.js` להעלות את מספר הגרסה: `tayeset1945-v1` → `tayeset1945-v2`.
+2. ב-`sw.js` להעלות את מספר הגרסה: `tayeset1945-v2` → `tayeset1945-v3`.
 3. בטלפון: לסגור ולפתוח את האפליקציה (לפעמים פעמיים).
 
 ## הערה על שמירה

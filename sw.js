@@ -1,14 +1,14 @@
 // טייסת 1945 – Service Worker: lets the game open and play offline.
 // After updating index.html, raise the version number below so phones pick up the new version.
-const CACHE = 'tayeset1945-v1';
+const CACHE = 'tayeset1945-v2';
 const FILES = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/maskable-512.png',
-  './icons/apple-touch-icon.png'
+  './icon-192.png',
+  './icon-512.png',
+  './maskable-512.png',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', e => {
