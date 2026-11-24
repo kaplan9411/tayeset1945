@@ -1,6 +1,6 @@
 // טייסת 1945 – Service Worker: lets the game open and play offline.
 // After updating index.html, raise the version number below so phones pick up the new version.
-const CACHE = 'tayeset1945-v2';
+const CACHE = 'tayeset1945-v3';
 const FILES = [
   './',
   './index.html',

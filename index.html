@@ -87,6 +87,7 @@ h3{font-size:16px;font-weight:900;margin:8px 0 6px;color:#ffe08a;align-self:flex
 .diff.sel{border-color:#ffd84a;background:rgba(255,216,74,.2)}
 /* Map */
 .stages{display:flex;flex-direction:column;gap:9px;width:100%;max-width:380px;flex:1;overflow-y:auto;min-height:0;padding:4px 2px}
+.chap{font-weight:900;color:#ffd84a;font-size:17px;margin:10px 4px 0;text-shadow:0 2px 0 #000}
 .stage{display:flex;align-items:center;gap:12px;border-radius:18px;padding:9px 12px;text-align:right;border:3px solid rgba(255,255,255,.25);box-shadow:0 4px 0 rgba(0,0,0,.35)}
 .stage .se{font-size:36px;width:50px;text-align:center}
 .stage .sn{font-size:20px;font-weight:900}
@@ -295,6 +296,41 @@ const STAGES=[
   {name:'המבצר בעננים',emoji:'☁️',theme:'sky',ground:null,boss:'skyFortress',bossName:'המבצר המעופף',waves:30,
     enemy:{body:'#1b1b22',wing:'#2b2b36',accent:'#ffd400'}},
 ];
+/* ---- Stages 9-30: themes, boss upgrades (דגם 2-4) ---- */
+function shade(hex,f){const n=parseInt(hex.slice(1),16);const m=x=>Math.max(0,Math.min(255,Math.round(x*f)));return'#'+((1<<24)+(m(n>>16)<<16)+(m(n>>8&255)<<8)+m(n&255)).toString(16).slice(1);}
+function lvlCol(c,l){if(l<=1)return c;if(l===2)return{body:shade(c.body,.8),wing:shade(c.wing,.8),accent:'#ff2d55'};if(l===3)return{body:shade(c.body,.55),wing:shade(c.wing,.6),accent:'#ffd43b'};return{body:'#4a1414',wing:'#6b1d1d',accent:'#ffd43b'};}
+(function(){
+  const BOSS_HOME={},THEME_HOME={};STAGES.forEach((s,i)=>{BOSS_HOME[s.boss]=i;if(!(s.theme in THEME_HOME))THEME_HOME[s.theme]=i;});
+  const GROUND={ocean:'ship',night:'ship',storm:'ship',desert:'tank',jungle:'tank',snow:'tank',volcano:'tank',sky:null};
+  const LVL=['','',' – דגם 2',' – דגם 3',' – דגם 4'];
+  [['שקיעה באוקיינוס','🌅','ocean','sunset','superBomber',2],
+   ['לילה במדבר','🐪','desert','night','fortress',2],
+   ['ערפל בג׳ונגל','🌫️','jungle','fog','flyingWing',2],
+   ['סופת ברקים','⚡','storm',null,'battleship',2],
+   ['סופת שלגים','❄️','snow','blizzard','zeppelin',2],
+   ['נמל האויב','⚓','night',null,'carrier',2],
+   ['עמק האפר','🌋','volcano','ash','train',2],
+   ['שקיעה מעל העננים','🌄','sky','sunset','skyFortress',2],
+   ['איי האלמוגים','🐠','ocean',null,'carrier',3],
+   ['מבצרי החול','🏰','desert','sunset','train',3],
+   ['המקדש בג׳ונגל','🛕','jungle','night','superBomber',3],
+   ['קרחוני הצפון','🧊','snow','night','fortress',3],
+   ['ים הסערות','🌊','storm','fog','battleship',3],
+   ['לב הר הגעש','🔥','volcano',null,'flyingWing',3],
+   ['סערה בעננים','🌩️','sky','storm','zeppelin',3],
+   ['ליל ירח מלא','🌕','night','fog','skyFortress',3],
+   ['הקרב על האיים','🏝️','ocean','sunset','battleship',4],
+   ['מדבר הסופה','🌪️','desert','fog','fortress',4],
+   ['ג׳ונגל בלילה','🦉','jungle','night','flyingWing',4],
+   ['הקרחון הענק','🏔️','snow','blizzard','train',4],
+   ['גשם של אש','☄️','volcano','ash','carrier',4],
+   ['הקרב האחרון','👑','sky','sunset','skyFortress',4],
+  ].forEach(([name,emoji,theme,tint,boss,lvl])=>{
+    const si=STAGES.length,home=STAGES[BOSS_HOME[boss]],te=STAGES[THEME_HOME[theme]].enemy;
+    STAGES.push({name,emoji,theme,tint,ground:GROUND[theme],boss,bossLvl:lvl,bossName:home.bossName+LVL[lvl],waves:Math.min(34,24+Math.floor((si-8)/2)),enemy:lvlCol(te,lvl)});
+  });
+  STAGES.forEach(s=>{s.bossLvl=s.bossLvl||1;s.rain=s.theme==='storm'||s.tint==='storm';});
+})();
 const ITEMS={
   P:{e:'⚡',bg1:'#ff6b6b',bg2:'#c92a2a',txt:'כוח אש!'},
   W:{e:'✈️',bg1:'#63e6be',bg2:'#0ca678',txt:'חברי טייסת!'},
@@ -603,7 +639,7 @@ function buildStageSprites(st){
   for(const k of['fighter','ace','bomber']){SPR[k+'F']=tint(SPR[k],'rgba(255,255,255,.85)');SPR[k+'Sh']=tint(SPR[k],'rgba(0,0,0,.28)',true);}
   SPR.shipF=tint(SPR.ship,'rgba(255,255,255,.8)');SPR.tankF=tint(SPR.tank,'rgba(255,255,255,.8)');
   const bd=BOSSES[st.boss];
-  SPR.boss=mk(bd.w,bd.h,g=>bd.draw(g,bd.col));SPR.bossF=tint(SPR.boss,'rgba(255,255,255,.7)');SPR.bossSh=tint(SPR.boss,'rgba(0,0,0,.28)',true);
+  const bcol=lvlCol(bd.col,st.bossLvl||1);SPR.boss=mk(bd.w,bd.h,g=>bd.draw(g,bcol));SPR.bossF=tint(SPR.boss,'rgba(255,255,255,.7)');SPR.bossSh=tint(SPR.boss,'rgba(0,0,0,.28)',true);
 }
 function buildPlayerSprites(){
   const p=PS();const draw=PLANE_DRAW[p.plane];const c=COLORS[p.color];
@@ -754,16 +790,17 @@ let G=null, P=null, D=DIFFS.normal;
 const keys={};
 let confetti=[];
 
+const ramp=(si,a,b)=>Math.min(si,7)*a+Math.max(0,si-7)*b;
 function newGame(si){
   const ps=PS();const st=STAGES[si];const pl=PLANES.find(p=>p.id===ps.plane);
   D=DIFFS[ps.diff];
   buildStageSprites(st);buildPlayerSprites();setTheme(st.theme);
   G={si,st,t:0,waves:buildSchedule(si),wi:0,nextWave:2.5,enemies:[],pb:[],eb:[],items:[],coins:[],parts:[],rings:[],texts:[],groups:{},gid:0,
     boss:null,bossPhase:'none',bossT:0,score:0,coinsGot:0,kills:0,over:false,won:false,dead:false,endT:0,continued:false,shake:0,flash:0,
-    hpm:(1+si*0.32)*D.hp,bhm:(1+si*0.2)*D.hp,spdm:1+si*0.05,firem:1+si*0.07,volley:0,totalWaves:0,lightning:0};
+    hpm:(1+ramp(si,0.32,0.12))*D.hp,bhm:(1+ramp(si,0.2,0.08))*D.hp,spdm:Math.min(1.55,1+ramp(si,0.05,0.012)),firem:Math.min(1.8,1+ramp(si,0.07,0.018)),volley:0,totalWaves:0,lightning:0};
   G.totalWaves=G.waves.length;
   const maxHp=Math.round(pl.hp+ps.upg.armor*18);
-  P={x:W/2,y:H-110,hp:maxHp,maxHp,power:1,fireT:0,inv:2,shield:0,wing:ps.upg.wing>0?10+ps.upg.wing*10:0,wingN:ps.upg.wing>0?Math.min(2,ps.upg.wing):0,
+  P={x:W/2,y:H-110,hp:maxHp,maxHp,power:Math.min(3,1+Math.floor(si/8)),fireT:0,inv:2,shield:0,wing:ps.upg.wing>0?10+ps.upg.wing*10:0,wingN:ps.upg.wing>0?Math.min(2,ps.upg.wing):0,
     wl:{x:W/2-34,y:H-96},wr:{x:W/2+34,y:H-96},wingFire:0,bombs:2+ps.upg.bombs,plane:pl,dmg:1+ps.upg.dmg*0.22,magnet:ps.upg.magnet,bank:0,alive:true};
   updateBombBtn();
 }
@@ -875,7 +912,7 @@ function killEnemy(e){
 /* ================= Boss ================= */
 function spawnBoss(){
   const def=BOSSES[G.st.boss];
-  G.boss={def,x:W/2,y:-def.h/2-10,t:0,hp:def.hp*G.bhm,maxHp:def.hp*G.bhm,phase:0,atkT:2,atkI:0,q:[],flash:0,ready:false,tur:def.tur.map(t=>({x:t[0],y:t[1],a:Math.PI/2}))};
+  G.boss={def,x:W/2,y:-def.h/2-10,t:0,hp:def.hp*G.bhm,maxHp:def.hp*G.bhm,phase:0,atkT:2,atkI:0,q:[],flash:0,ready:false,lvl:G.st.bossLvl||1,atk:def.atk.map(l=>(G.st.bossLvl||1)>=4?l.concat(['cross','spiral']):(G.st.bossLvl||1)>=3?l.concat(['wall']):l),tur:def.tur.map(t=>({x:t[0],y:t[1],a:Math.PI/2}))};
   G.bossPhase='fight';
 }
 function bossLater(b,t,fn){b.q.push({t,fn});}
@@ -898,10 +935,10 @@ function updateBoss(dt){
   if(!b.ready){b.y+=60*dt;if(b.y>=150+safeTop){b.ready=true;b.t=0;}}
   else{
     const amp=Math.max(30,W/2-b.def.w*0.32);
-    b.x=W/2+amp*Math.sin(b.t*0.55);b.y=150+safeTop+12*Math.sin(b.t*0.9);
+    b.x=W/2+amp*Math.sin(b.t*0.55*(1+0.15*(b.lvl-1)));b.y=150+safeTop+12*Math.sin(b.t*0.9);
     const ratio=b.hp/b.maxHp;b.phase=ratio>0.66?0:ratio>0.33?1:2;
     b.atkT-=dt*D.fire*G.firem;
-    if(b.atkT<=0){const list=b.def.atk[b.phase];const name=list[b.atkI++%list.length];b.atkT=ATK[name](b)/Math.max(.6,D.fire)*0.9+0.4;}
+    if(b.atkT<=0){const list=b.atk[b.phase];const name=list[b.atkI++%list.length];b.atkT=ATK[name](b)/Math.max(.6,D.fire)*0.9+0.4;}
   }
   for(const t of b.tur){const p=tp(b,t);const a=aim(p.x,p.y);let d=a-t.a;while(d>Math.PI)d-=TAU;while(d<-Math.PI)d+=TAU;t.a+=d*Math.min(1,dt*4);}
   for(const q of b.q){q.t-=dt;if(q.t<=0&&!q.done){q.done=true;if(b.ready&&b.hp>0)q.fn();}}
@@ -998,7 +1035,7 @@ function update(dt){
 }
 function updateGame(dt){
   G.t+=dt;bgUpdate(dt);
-  if(BG.name==='storm'){if(G.lightning>0)G.lightning-=dt;else if(Math.random()<dt*0.12)G.lightning=0.22;}
+  if(G.st.rain){if(G.lightning>0)G.lightning-=dt;else if(Math.random()<dt*0.12)G.lightning=0.22;}
   if(BG.name==='volcano'&&Math.random()<dt*7)puff(rnd(0,W),H+5,rnd(1.5,3),'ember',rnd(2,3.5),rnd(-15,15),-rnd(50,110),0);
   if(G.shake>0)G.shake-=dt;if(G.flash>0)G.flash-=dt;
   // --- player
@@ -1109,7 +1146,14 @@ function render(){
   if((state==='play'||state==='pause')&&G)drawHUD();
   for(const c of confetti){ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.a);ctx.fillStyle=c.c;ctx.fillRect(-4,-2.5,8,5);ctx.restore();}
 }
+function drawTint(){
+  const t=G.st.tint;if(!t)return;
+  if(t==='sunset'){const gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,'rgba(255,130,40,.4)');gr.addColorStop(1,'rgba(170,60,120,.3)');ctx.fillStyle=gr;}
+  else ctx.fillStyle={night:'rgba(8,15,50,.45)',fog:'rgba(225,230,236,.32)',blizzard:'rgba(255,255,255,.18)',ash:'rgba(45,38,36,.32)',storm:'rgba(25,35,55,.32)'}[t]||'rgba(0,0,0,0)';
+  ctx.fillRect(-10,-10,W+20,H+20);
+}
 function drawGame(){
+  drawTint();
   // ground units
   for(const e of G.enemies){
     if(e.air||e.t<0)continue;
@@ -1176,14 +1220,16 @@ function drawGame(){
   for(const t of G.texts){ctx.direction=/[\u0590-\u05FF]/.test(t.txt)?'rtl':'ltr';ctx.globalAlpha=Math.min(1,t.life*2);ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.strokeText(t.txt,t.x,t.y);ctx.fillStyle=t.col;ctx.fillText(t.txt,t.x,t.y);}
   ctx.globalAlpha=1;ctx.direction='inherit';
   if(G.flash>0){ctx.fillStyle='rgba(255,250,230,'+Math.min(0.85,G.flash)+')';ctx.fillRect(-10,-10,W+20,H+20);}
-  if(BG.name==='storm'){
+  if(G.st.rain){
     ctx.strokeStyle='rgba(200,220,240,.35)';ctx.lineWidth=1.2;ctx.beginPath();
     for(let i=0;i<50;i++){const x=((i*97.3+G.t*90)%(W+60))-30,y=((i*371.7+G.t*720)%(H+60))-30;ctx.moveTo(x,y);ctx.lineTo(x-5,y+15);}ctx.stroke();
     ctx.fillStyle='rgba(0,10,20,.18)';ctx.fillRect(-10,-10,W+20,H+20);
     if(G.lightning>0){ctx.fillStyle='rgba(230,240,255,'+(Math.floor(G.lightning*30)%2?0.35:0.1)+')';ctx.fillRect(-10,-10,W+20,H+20);}
   }
   if(BG.name==='volcano'){const gr=ctx.createLinearGradient(0,H*0.5,0,H);gr.addColorStop(0,'rgba(255,60,0,0)');gr.addColorStop(1,'rgba(255,60,0,.14)');ctx.fillStyle=gr;ctx.fillRect(-10,-10,W+20,H+20);}
-  if(BG.name==='night'){const gr=ctx.createRadialGradient(P.x,P.y,60,P.x,P.y,H*0.9);gr.addColorStop(0,'rgba(0,0,20,0)');gr.addColorStop(1,'rgba(0,0,20,.35)');ctx.fillStyle=gr;ctx.fillRect(-10,-10,W+20,H+20);}
+  if(G.st.tint==='blizzard'){ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();for(let i=0;i<70;i++){const x=((i*83.1+G.t*70)%(W+40))-20,y=((i*211.3+G.t*(140+(i%5)*20))%(H+40))-20,r=1.2+(i%3)*0.7;ctx.moveTo(x+r,y);ctx.arc(x,y,r,0,TAU);}ctx.fill();}
+  if(G.st.tint==='ash'){ctx.fillStyle='rgba(90,85,85,.7)';ctx.beginPath();for(let i=0;i<55;i++){const x=((i*61.7+Math.sin(G.t+i)*20+400)%(W+40))-20,y=((i*197.9+G.t*(50+(i%4)*12))%(H+40))-20;ctx.moveTo(x+1.8,y);ctx.arc(x,y,1.8,0,TAU);}ctx.fill();}
+  if(BG.name==='night'||G.st.tint==='night'){const gr=ctx.createRadialGradient(P.x,P.y,60,P.x,P.y,H*0.9);gr.addColorStop(0,'rgba(0,0,20,0)');gr.addColorStop(1,'rgba(0,0,20,.35)');ctx.fillStyle=gr;ctx.fillRect(-10,-10,W+20,H+20);}
 }
 function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function outlinedText(t,x,y,size,col,align){
@@ -1331,17 +1377,23 @@ function goHangar(){
 const STAGE_BG_EXTRA=['linear-gradient(90deg,#1f3640,#3d5f6e)','linear-gradient(90deg,#4a1e10,#b8420f)','linear-gradient(90deg,#5d8fc9,#a8d0f5)'];
 const STAGE_BG=['linear-gradient(90deg,#1e6fb6,#3d8fd6)','linear-gradient(90deg,#b8863f,#d8b06a)','linear-gradient(90deg,#1f6b29,#3c9c45)','linear-gradient(90deg,#0f2449,#2a3f7a)','linear-gradient(90deg,#7d9bb8,#b8cde0)'];
 STAGE_BG.push(...STAGE_BG_EXTRA);
+const THEME_BG={};STAGE_BG.forEach((g,i)=>{if(STAGES[i])THEME_BG[STAGES[i].theme]=g;});
+const TINT_BG={sunset:'linear-gradient(90deg,rgba(255,120,40,.4),rgba(150,40,130,.4)),',night:'linear-gradient(rgba(5,10,45,.55),rgba(5,10,45,.55)),',fog:'linear-gradient(rgba(225,230,236,.35),rgba(225,230,236,.35)),',blizzard:'linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.35)),',ash:'linear-gradient(rgba(40,35,35,.45),rgba(40,35,35,.45)),',storm:'linear-gradient(rgba(20,30,50,.45),rgba(20,30,50,.45)),'};
+const CHAPTERS=['🎖️ מערכה 1 – מלחמת 1945','🎖️ מערכה 2 – הדגמים החדשים','🎖️ מערכה 3 – הטייסת הזהובה','🎖️ מערכה 4 – הקרב על המלכות'];
 function goMap(){
   state='map';show('scrMap');const ps=PS();
   $('mapAv').textContent=ps.avatar||'🧑‍✈️';$('mapCoins').textContent=ps.coins;
   const L=$('stageList');L.innerHTML='';
+  let target=null;
   STAGES.forEach((st,i)=>{
+    if(i%8===0){const h=document.createElement('div');h.className='chap';h.textContent=CHAPTERS[i/8]||'';L.appendChild(h);}
     const locked=i+1>ps.unlocked;const stars=ps.stars[i]||0;
-    const b=document.createElement('button');b.className='stage'+(locked?' locked':'');b.style.background=STAGE_BG[i];
+    const b=document.createElement('button');b.className='stage'+(locked?' locked':'');b.style.background=(TINT_BG[st.tint]||'')+(THEME_BG[st.theme]||STAGE_BG[0]);if(i===Math.min(ps.unlocked,STAGES.length)-1)target=b;
     b.innerHTML='<div class="se">'+(locked?'🔒':st.emoji)+'</div><div><div class="sn">'+(i+1)+'. '+st.name+'</div><div class="ss">בוס: '+st.bossName+(ps.best[i]?' · שיא '+ps.best[i]:'')+'</div></div><div class="st">'+'⭐'.repeat(stars)+'<span style="opacity:.35">'+'⭐'.repeat(3-stars)+'</span></div>';
     b.onclick=()=>{if(locked){toast('קודם צריך לנצח בשלב '+i);SFX.hit();return;}SFX.click();startStage(i);};
     L.appendChild(b);
   });
+  if(target)setTimeout(()=>{try{target.scrollIntoView({block:'center'});}catch(e){}},30);
 }
 function startStage(i){
   newGame(i);state='play';show(null);confetti=[];
@@ -1411,6 +1463,12 @@ function resize(){
   if(P){P.y=clamp(P.y,60+safeTop,H-26);}
 }
 addEventListener('resize',resize);
+(function migrateSave(){
+  for(const k in save.pilots){const q=save.pilots[k];let mx=q.unlocked||1;
+    for(const i in q.stars){if(q.stars[i]>0)mx=Math.max(mx,+i+2);}
+    q.unlocked=Math.min(STAGES.length,mx);}
+  writeSave();
+})();
 resize();buildCommonSprites();setTheme('ocean');soundLabel();
 let last=performance.now();
 function frame(now){
